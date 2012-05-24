@@ -11,16 +11,14 @@
         var defaults = {
             showLoader : true,
             loaderClass : 'skTabsLoader',
-            ajaxContentClass : 'skAjaxContent',
-            useLocationHash : true
+            useLocationHash : true,
+            onAjaxComplete : function(){}
         }
 
         var plugin = this;
 
         plugin.settings = {};
         plugin.loader_is_appended = false;
-        plugin.ajax_content = {};
-        plugin.ajax_is_appended = false;
 				
         var $element = $(element),
             element = element,
@@ -39,29 +37,26 @@
             // Bind click event
             $tabs.find('a').click(function(){
 							
-							if( !($(this).hasClass('disabled')) ){
-								var href = $(this).attr('href'),
-	            			text = '#'+$.trim($(this).text().toLowerCase());
-	            			text = text.replace(' ', '_');
+							if( !($(this).parent().hasClass('disabled')) ){
+	            			
+	            	var tabInfo = getTabInfo($(this));		
 	            	
 	            	// Update hash
 	            	if(plugin.settings.useLocationHash == true){
-	            		if(href.substring(0,1) == '#'){
-		            		window.location.hash = href;
+	            		if(tabInfo.href.substring(0,1) == '#'){
+		            		window.location.hash = tabInfo.href;
 		            	} else {
-		            		window.location.hash = text;
+		            		window.location.hash = tabInfo.text;
 		            	}
 	            	}
 	            	
-	            	
 	            	// Change tab active class
-	            	$tabs.find('a').removeClass('active');
-	            	$(this).addClass('active');
+	            	$tabs.find('li').removeClass('active');
+	            	$(this).parent().addClass('active');
 	            	
-								switchTab(href);
-								return false;
+								switchTab(tabInfo.href, tabInfo.text);
 							}
-            	
+            	return false;
             });
         } // END plugin.init()
         
@@ -69,33 +64,37 @@
         		
         		$panes.children().hide();
             var href;
+            var tabInfo;
             
             
             if(window.location.hash == '' || plugin.settings.useLocationHash == false){
              	
-             	// No hash found, or useLocationHash is turned off. Show the first pane
-							href = $tabs.find('li:first-child a').attr('href');
-							$tabs.find('li:first-child a').addClass('active');
-							switchTab(href);
+             	// No hash found, or useLocationHash is turned off. Show the first pane							
+							$tabs.find('li:first-child').addClass('active');
+							tabInfo = getTabInfo($tabs.find('li:first-child a'));
+							switchTab(tabInfo.href, tabInfo.text);
 							
             } else {
             	
             	// Show pane which matches url hash
             	if($tabs.find('li a[href="'+window.location.hash+'"]').length > 0){
-            		$tabs.find('li a[href="'+window.location.hash+'"]').addClass('active');
-            		href = window.location.hash;
-            		switchTab(href);
+            		$tabs.find('li a[href="'+window.location.hash+'"]').parent().addClass('active');
+            		
+            		tabInfo = getTabInfo($tabs.find('li a[href="'+window.location.hash+'"]'));
+            		
+            		switchTab(window.location.hash, tabInfo.text);
             	} else {
             	
             		// Match not found. Check link text
             		// To do - Check data-label attr first and use that if available
             		$tabs.find('a').each(function(){
-	        				var text = '#'+$.trim($(this).text().toLowerCase());
-	        				text = text.replace(' ', '_');
-	        				if(text == window.location.hash){
-	        					href = $(this).attr('href');
-	        					$(this).addClass('active');
-	        					switchTab(href);
+	        					        				
+	        				tabInfo = getTabInfo($(this));
+	        				
+	        				if('#'+tabInfo.text == window.location.hash){
+	        					tabInfo.href = $(this).attr('href');
+	        					$(this).parent().addClass('active');
+	        					switchTab(tabInfo.href, tabInfo.text);
 	        				}
 	        			});
             	}
@@ -104,12 +103,20 @@
             
         } // END showFirstTab()
         
-        var switchTab = function(href){
-        	
-        	//alert('Switching tab '+href+' '+$element.attr('id'));
-        	        	
+        var getTabInfo = function(clickedElement){
+        		
+        		var tabInfo = {},
+        		text = $.trim(clickedElement.text().toLowerCase().replace(' ', '_'));
+        		tabInfo.text = text;
+        		tabInfo.href = clickedElement.attr('href');
+        		return tabInfo;
+        }
+        
+        var switchTab = function(href, text){
+        	        	        	
         	// Check if url is a hash or a real one
         	if(href.substring(0, 1) == '#'){
+        		
         		// Normal Show/Hide tab
         		$panes.children().hide();
             $panes.find(href).show();
@@ -123,37 +130,26 @@
         		if(!plugin.loader_is_appended && plugin.settings.showLoader == true){
         			$element.append('<div class="'+plugin.settings.loaderClass+'"></div>');
         			plugin.loader_is_appended = true;
-        		}
-        		
-        		// The first time this runs we should inject an ajax content container
-        		if(!plugin.ajax_is_appended){
-        			$panes.append('<div class="'+plugin.settings.ajaxContentClass+'"></div>');
-        			plugin.ajax_is_appended = true;
         		} else {
-        			$panes.find('.'+plugin.settings.ajaxContentClass).empty();
-        		}
-        		
-        		// Has this content previously been loaded? 
-        		if(plugin.ajax_content[href]){ 
-        			
-        			// If so get it from the ajax_content object
-        			$panes.find('.'+plugin.settings.ajaxContentClass).html(plugin.ajax_content[href]).show();
-        			//console.log('cached content');
-        		
-        		} else { 
-        			// Ajax request
         			$element.find('.'+plugin.settings.loaderClass).show();// Show loader div
-        			//console.log('ajax content');
-        			$.ajax({
-	            	url : href,
-	            	success : function(data, textStatus, jqXHR){
-	            		$element.find('.'+plugin.settings.loaderClass).hide();
-	            		$panes.find('.'+plugin.settings.ajaxContentClass).html(data).show();
-	            		plugin.ajax_content[href] = data;
-	            		//console.log(plugin.ajax_content);
-	            	}
-	            });
         		}
+        		
+        		       
+      			// Ajax request      			
+      			$.ajax({
+            	url : href,
+            	success : function(data, textStatus, jqXHR){
+
+            		//console.log('AJAX request: '+href);
+            		
+            		$element.find('.'+plugin.settings.loaderClass).hide();	            		
+            		$tabs.find('a[href="'+href+'"]').attr('href', '#'+text);
+            		$panes.append('<div id="'+text+'">'+data+'</div>');
+            			            		
+            		// Callback function
+            		plugin.settings.onAjaxComplete.call(this);
+            	}
+            });
         		
         	}
         } // END switchTab()
