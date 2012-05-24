@@ -1,36 +1,7 @@
 /* 
 * skTabs 
 * Version 1.0
-* tabType : 'normal' or 'ajax'
-* showLoader: true / false (for ajax mode) 
-* useLocationHash : true/false
-* Usage: $('.my_container').skTabs();
-
-Normal Markup:
-
-<div class="my_container">
-	<ul class="tabs">
-		<li><a href="#pane1">Tab 1</li>
-		<li><a href="#pane2">Tab 2</li>
-	</ul>
-	
-	<div class="panes">
-		<div id="#pane1">Pane 1 content</div>
-		<div id="#pane2>Pane 2 content</div>
-	</div>
-</div>
-
-Ajax markup:
-
-	<div class="my_container">
-	<ul class="tabs">
-		<li><a href="http://example.com">Tab 1</li>
-		<li><a href="http://example2.com">Tab 2</li>
-	</ul>
-	
-	<div class="panes"><!-- Empty --></div>
-</div>
-
+* Usage: $('#my_container').skTabs();
 */ 
 (function($) {
 
@@ -38,10 +9,10 @@ Ajax markup:
 				
 				// Plugin defaults
         var defaults = {
-            showLoader : false,
+            showLoader : true,
             loaderClass : 'skTabsLoader',
             ajaxContentClass : 'skAjaxContent',
-            useLocationHash : false
+            useLocationHash : true
         }
 
         var plugin = this;
@@ -57,6 +28,7 @@ Ajax markup:
             $tabs = $element.find('.tabs').not('#'+elementId+' .panes .tabs'),
             $panes = $element.children('.panes').not('#'+elementId+' .panes .panes');
         
+        
         plugin.init = function() {
             
             plugin.settings = $.extend({}, defaults, options);
@@ -67,27 +39,29 @@ Ajax markup:
             // Bind click event
             $tabs.find('a').click(function(){
 							
-														
-            	var href = $(this).attr('href'),
-            			text = '#'+$.trim($(this).text().toLowerCase());
-            			text = text.replace(' ', '_');
-            	
-            	// Update hash
-            	if(plugin.settings.useLocationHash == true){
-            		if(href.substring(0,1) == '#'){
-	            		window.location.hash = href;
-	            	} else {
-	            		window.location.hash = text;
+							if( !($(this).hasClass('disabled')) ){
+								var href = $(this).attr('href'),
+	            			text = '#'+$.trim($(this).text().toLowerCase());
+	            			text = text.replace(' ', '_');
+	            	
+	            	// Update hash
+	            	if(plugin.settings.useLocationHash == true){
+	            		if(href.substring(0,1) == '#'){
+		            		window.location.hash = href;
+		            	} else {
+		            		window.location.hash = text;
+		            	}
 	            	}
-            	}
+	            	
+	            	
+	            	// Change tab active class
+	            	$tabs.find('a').removeClass('active');
+	            	$(this).addClass('active');
+	            	
+								switchTab(href);
+								return false;
+							}
             	
-            	
-            	// Change tab active class
-            	$tabs.find('a').removeClass('active');
-            	$(this).addClass('active');
-            	
-							switchTab(href);
-							return false;
             });
         } // END plugin.init()
         
