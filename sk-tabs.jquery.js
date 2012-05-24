@@ -38,11 +38,10 @@ Ajax markup:
 				
 				// Plugin defaults
         var defaults = {
-            tabType : 'normal',
-            showLoader : true,
+            showLoader : false,
             loaderClass : 'skTabsLoader',
             ajaxContentClass : 'skAjaxContent',
-            useLocationHash : true
+            useLocationHash : false
         }
 
         var plugin = this;
@@ -54,8 +53,9 @@ Ajax markup:
 				
         var $element = $(element),
              element = element,
-            $tabs = $element.find('.tabs'),
-            $panes = $element.find('.panes');
+             elementId = $element.attr('id'),
+            $tabs = $element.children('.tabs'),
+            $panes = $element.children('.panes');
         
         plugin.init = function() {
             
@@ -73,11 +73,14 @@ Ajax markup:
             			text = text.replace(' ', '_');
             	
             	// Update hash
-            	if(href.substring(0,1) == '#'){
-            		window.location.hash = href;
-            	} else {
-            		window.location.hash = text;
+            	if(plugin.settings.useLocationHash == true){
+            		if(href.substring(0,1) == '#'){
+	            		window.location.hash = href;
+	            	} else {
+	            		window.location.hash = text;
+	            	}
             	}
+            	
             	
             	// Change tab active class
             	$tabs.find('a').removeClass('active');
@@ -128,6 +131,8 @@ Ajax markup:
         } // END showFirstTab()
         
         var switchTab = function(href){
+        	
+        	//alert('Switching tab '+href+' '+$element.attr('id'));
         	        	
         	// Check if url is a hash or a real one
         	if(href.substring(0, 1) == '#'){
