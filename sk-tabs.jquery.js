@@ -52,10 +52,10 @@ Ajax markup:
         plugin.ajax_is_appended = false;
 				
         var $element = $(element),
-             element = element,
-             elementId = $element.attr('id'),
-            $tabs = $element.children('.tabs'),
-            $panes = $element.children('.panes');
+            element = element,
+            elementId = $element.attr('id'),
+            $tabs = $element.find('.tabs').not('#'+elementId+' .panes .tabs'),
+            $panes = $element.children('.panes').not('#'+elementId+' .panes .panes');
         
         plugin.init = function() {
             
