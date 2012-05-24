@@ -7,17 +7,17 @@ In your tabs either specify a div id (e.g. "#myDiv") or a url. The plugin will d
 
 Once content has been retrieved via an ajax request, the plugin stores the content, and won't make any further requests for the same content.
 
-Markup:
+#Markup:
 
-<div id="my_container">
-	<ul class="tabs">
-		<li><a href="#pane1">Tab 1</li>
-		<li><a href="#pane2">Tab 2</li>
-		<li><a href="http://example.com/ajaxcontent.html">Tab 3</li>
-	</ul>
+#<div id="my_container">
+#	<ul class="tabs">
+#		<li><a href="#pane1">Tab 1</li>
+#		<li><a href="#pane2">Tab 2</li>
+#		<li><a href="http://example.com/ajaxcontent.html">Tab 3</li>
+#	</ul>
 	
-	<div class="panes">
-		<div id="#pane1">Pane 1 content</div>
-		<div id="#pane2>Pane 2 content</div>
-	</div>
-</div>
+#	<div class="panes">
+#		<div id="#pane1">Pane 1 content</div>
+#		<div id="#pane2>Pane 2 content</div>
+#	</div>
+#</div>
