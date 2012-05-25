@@ -3,9 +3,17 @@
 
 Simple(ish) jQuery tabbing plugin. I struggled to find a solution out there that could handle standard show/hide tabs and ajax requests at the same time, so I wrote this.
 
-Use page anchors `<a href="#pane1">Tab 1</a>` or real urls `<a href="http://example.com/ajaxcontent.html">Ajax tab</a>` in your tabs. The plugin will decide whether to show existing page content ormake an ajax request.
+In your tabs, use page anchors:
 
-The plugin converts Ajax tabs to standard show/hide ones on completion of a request, ensuring that each ajax request only happens once.
+		<a href="#pane1">Tab 1</a> 
+		
+or real urls: 
+
+		<a href="http://example.com/ajaxcontent.html">Ajax tab</a> 
+
+- the plugin will decide whether to show existing page content or make an ajax request.
+
+The plugin converts AJAX tabs to standard show/hide ones once content is retrieved, ensuring that only one http request is made per AJAX tab.
 
 ##Markup:
 
