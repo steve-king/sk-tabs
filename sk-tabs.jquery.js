@@ -9,6 +9,7 @@
 				
 				// Plugin defaults
         var defaults = {
+        		animate : false,
         		showFirstTab : false,
         		useLocationHash : false,
             showLoader : true,
@@ -113,14 +114,25 @@
         
         var getTabInfo = function(clickedElement){
         		
-        		var tabInfo = {},
-        		text = $.trim(clickedElement.text().toLowerCase().replace(' ', '_'));
+        		var tabInfo = {}, text;
+        		
+        		if(clickedElement.attr('data-label')){
+        			text = clickedElement.attr('data-label');
+        		} else {
+        			text = $.trim(clickedElement.text().toLowerCase());
+        			text = text.replace(' ', '_');
+        		}
+        		
         		tabInfo.text = text;
         		tabInfo.href = clickedElement.attr('href');
         		return tabInfo;
         }
         
         var switchPane = function(href, text){
+        	
+        	if(plugin.settings.animate == true){
+        		$panes.height($panes.height());
+        	}
         	
         	$panes.children().hide();
         	        	        	
@@ -129,20 +141,17 @@
         		
         		// Normal Show/Hide tab
             plugin.currentPane = $panes.find(href);
-            plugin.currentPane.show();
+            
+            showPane();
             
         	} else {
         		// Ajax tab
         		        		
-        		// Show loading div. Append as HTML if this is the first time
+        		
         		if(plugin.settings.showLoader == true){
-        			if(plugin.loader_appended){
-        				$element.find('.'+plugin.settings.loaderClass).show();// Show loader div
-        			} else {
-        				$element.append('<div class="'+plugin.settings.loaderClass+'"></div>');
-        				plugin.loader_appended = true;
-        			}
+        			showLoader();
         		}
+        		
     
       			// Ajax request      			
       			$.ajax({
@@ -150,9 +159,14 @@
             	success : function(data, textStatus, jqXHR){
             		
             		$element.find('.'+plugin.settings.loaderClass).hide();	            		
-            		$tabs.find('a[href="'+href+'"]').attr('href', '#'+text);
             		$panes.append('<div id="'+text+'">'+data+'</div>');
             		plugin.currentPane = $('#'+text);
+            		$tabs.find('a[href="'+href+'"]').attr('href', '#'+text);
+            		
+            		if(!(plugin.currentPane.is(':visible'))){
+            			showPane();
+            		}
+            		
             			            		
             		// Callback function
             		plugin.settings.onAjaxComplete.call(this, plugin);
@@ -162,12 +176,51 @@
         	}
         } // END switchPane()
         
+        var showPane = function(){
+        		
+        		if(plugin.settings.animate == true){
+        			plugin.currentPane.css({'visibility' : 'hidden'}).show();
+	            $panes.animate({'height' : plugin.currentPane.outerHeight()+'px'}, function(){
+	            	plugin.currentPane.css({'visibility' : 'visible'});
+	            });
+        		} else {
+        			plugin.currentPane.show();
+        		}
+        }
         
+        var showLoader = function(){
+        			// Show loading div. Append as HTML if this is the first time
+        		
+      			if(!plugin.loader_appended){
+      				$panes.append('<div class="'+plugin.settings.loaderClass+'" style="visibility:hidden; display:none;"></div>');
+      				plugin.loader_appended = true;
+      			}
+      			
+      			var $loader = $element.find('.'+plugin.settings.loaderClass);
+        		
+        		$loader.show();
+        		
+        		var loaderHeight = $loader.outerHeight();
+        		if(plugin.settings.animate == true && $panes.outerHeight() < loaderHeight){
+        	
+      				$panes.animate({'height' : loaderHeight+'px'}, 'fast', function(){
+      					 $loader.css({'visibility' : 'visible'});
+      				});
+        		} else {
+        			$loader.css({'visibility' : 'visible'});
+        		}        			
+        		
+        		
+        }
         
         // PUBLIC METHODS
         plugin.hideAll = function() {
         	$tabs.find('li').removeClass('active');
-          $panes.children().hide();
+        	
+        	if(plugin.settings.animate == true){
+        		$panes.css({'height' : 'auto'});
+        	}
+          $panes.children().slideUp();
         }
         
         plugin.init();
