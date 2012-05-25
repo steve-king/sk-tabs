@@ -11,7 +11,7 @@ or real urls:
 
 		<a href="http://example.com/ajaxcontent.html">Ajax tab</a> 
 
-- the plugin will decide whether to show existing page content or make an ajax request.
+The plugin will decide whether to show existing page content or make an ajax request.
 
 The plugin converts AJAX tabs to standard show/hide ones once content is retrieved, ensuring that only one http request is made per AJAX tab.
 
