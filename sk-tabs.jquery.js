@@ -9,17 +9,19 @@
 				
 				// Plugin defaults
         var defaults = {
+        		useLocationHash : false,
             showLoader : true,
             loaderClass : 'skTabsLoader',
-            useLocationHash : true,
             onAjaxComplete : function(){}
         }
-
-        var plugin = this;
-
-        plugin.settings = {};
-        plugin.loader_is_appended = false;
 				
+				// Public vars
+        var plugin = this;
+        plugin.settings = {};
+        plugin.loader_appended = false;
+        plugin.currentPane;
+				
+				// Private vars
         var $element = $(element),
             element = element,
             elementId = $element.attr('id'),
@@ -29,7 +31,7 @@
         
         plugin.init = function() {
             
-            plugin.settings = $.extend({}, defaults, options);
+            plugin.settings = $.extend({}, defaults, options); // Extend defaults with any options passed
             
             // Show first tab
  	          showFirstTab(); 
@@ -54,7 +56,8 @@
 	            	$tabs.find('li').removeClass('active');
 	            	$(this).parent().addClass('active');
 	            	
-								switchTab(tabInfo.href, tabInfo.text);
+	            	// Switch content pane
+								switchPane(tabInfo.href, tabInfo.text);
 							}
             	return false;
             });
@@ -63,29 +66,27 @@
         var showFirstTab = function(){
         		
         		$panes.children().hide();
-            var href;
             var tabInfo;
             
-            
+            // No hash found, or useLocationHash is turned off. Show the first pane	
             if(window.location.hash == '' || plugin.settings.useLocationHash == false){
-             	
-             	// No hash found, or useLocationHash is turned off. Show the first pane							
+             				
 							$tabs.find('li:first-child').addClass('active');
 							tabInfo = getTabInfo($tabs.find('li:first-child a'));
-							switchTab(tabInfo.href, tabInfo.text);
+							switchPane(tabInfo.href, tabInfo.text);
 							
             } else {
+            // Show pane which matches url hash
             	
-            	// Show pane which matches url hash
             	if($tabs.find('li a[href="'+window.location.hash+'"]').length > 0){
+            		
             		$tabs.find('li a[href="'+window.location.hash+'"]').parent().addClass('active');
-            		
             		tabInfo = getTabInfo($tabs.find('li a[href="'+window.location.hash+'"]'));
+            		switchPane(window.location.hash, tabInfo.text);
             		
-            		switchTab(window.location.hash, tabInfo.text);
             	} else {
+            	// Match not found. Check link text
             	
-            		// Match not found. Check link text
             		// To do - Check data-label attr first and use that if available
             		$tabs.find('a').each(function(){
 	        					        				
@@ -94,7 +95,7 @@
 	        				if('#'+tabInfo.text == window.location.hash){
 	        					tabInfo.href = $(this).attr('href');
 	        					$(this).parent().addClass('active');
-	        					switchTab(tabInfo.href, tabInfo.text);
+	        					switchPane(tabInfo.href, tabInfo.text);
 	        				}
 	        			});
             	}
@@ -112,47 +113,47 @@
         		return tabInfo;
         }
         
-        var switchTab = function(href, text){
+        var switchPane = function(href, text){
+        	
+        	$panes.children().hide();
         	        	        	
         	// Check if url is a hash or a real one
         	if(href.substring(0, 1) == '#'){
         		
         		// Normal Show/Hide tab
-        		$panes.children().hide();
-            $panes.find(href).show();
+            plugin.currentPane = $panes.find(href);
+            plugin.currentPane.show();
             
         	} else {
+        		// Ajax tab
         		        		
-        		// Ajax Tab
-        		$panes.children().hide();
-        		
-        		// The first time this runs we should inject a loading div
-        		if(!plugin.loader_is_appended && plugin.settings.showLoader == true){
-        			$element.append('<div class="'+plugin.settings.loaderClass+'"></div>');
-        			plugin.loader_is_appended = true;
-        		} else {
-        			$element.find('.'+plugin.settings.loaderClass).show();// Show loader div
+        		// Show loading div. Append as HTML if this is the first time
+        		if(plugin.settings.showLoader == true){
+        			if(plugin.loader_appended){
+        				$element.find('.'+plugin.settings.loaderClass).show();// Show loader div
+        			} else {
+        				$element.append('<div class="'+plugin.settings.loaderClass+'"></div>');
+        				plugin.loader_appended = true;
+        			}
         		}
-        		
-        		       
+    
       			// Ajax request      			
       			$.ajax({
             	url : href,
             	success : function(data, textStatus, jqXHR){
-
-            		//console.log('AJAX request: '+href);
             		
             		$element.find('.'+plugin.settings.loaderClass).hide();	            		
             		$tabs.find('a[href="'+href+'"]').attr('href', '#'+text);
             		$panes.append('<div id="'+text+'">'+data+'</div>');
+            		plugin.currentPane = $('#'+text);
             			            		
             		// Callback function
-            		plugin.settings.onAjaxComplete.call(this);
+            		plugin.settings.onAjaxComplete.call(this, plugin);
             	}
             });
         		
         	}
-        } // END switchTab()
+        } // END switchPane()
         
         plugin.init();
     }

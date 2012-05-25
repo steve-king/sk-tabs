@@ -7,6 +7,8 @@ Specify an id (e.g. "#myDiv") or a url for your tab link href. The plugin will d
 
 Once content has been retrieved via an ajax request, the plugin stores the content, and won't make any further requests for the same content.
 
+##Usage
+
 #Markup:
 
 		<div id="my_container">
@@ -21,3 +23,15 @@ Once content has been retrieved via an ajax request, the plugin stores the conte
 				<div id="#pane2>Pane 2 content</div>
 			</div>
 		</div>
+
+#jQuery:
+
+$('#my_container').skTabs({
+
+	// Default options
+	useLocationHash : false, 									// Optional url hackable tabs 
+  showLoader : true,			 									// Show loading div during ajax requests
+  loaderClass : 'skTabsLoader',							// Specify a custom loader class name here
+  onAjaxComplete : function(pluginData){}   // Custom callback function on completion of Ajax request.
+
+});
