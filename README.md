@@ -1,4 +1,4 @@
-SK TABS
+#SK TABS
 --------------------------------------------------
 
 Simple(ish) jQuery tabbing plugin. I struggled to find a solution out there that could handle standard show/hide tabs and ajax requests at the same time, so I wrote this.
