@@ -27,9 +27,9 @@ Once content has been retrieved via an ajax request, the plugin stores the conte
 		$('#my_container').skTabs();
 
 ##Default options
-		useLocationHash : false, 									// Optional url hackable tabs 
-		showLoader : true,			 									// Show loading div during ajax requests
-		loaderClass : 'skTabsLoader',							// Specify a custom loader class name here
-		onAjaxComplete : function(pluginData){}   // Custom callback function on completion of Ajax request.
+		useLocationHash : false,                // Optional url hackable tabs 
+		showLoader : true,				              // Show loading div during ajax requests
+		loaderClass : 'skTabsLoader',           // Specify a custom loader class name here
+		onAjaxComplete : function(pluginData){} // Custom callback function on completion of Ajax request.
 
 
