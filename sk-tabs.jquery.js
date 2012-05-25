@@ -9,6 +9,7 @@
 				
 				// Plugin defaults
         var defaults = {
+        		showFirstTab : false,
         		useLocationHash : false,
             showLoader : true,
             loaderClass : 'skTabsLoader',
@@ -33,8 +34,14 @@
             
             plugin.settings = $.extend({}, defaults, options); // Extend defaults with any options passed
             
+            console.log(plugin.settings.showFirstTab+' '+elementId);
+            //console.log(plugin.settings.useLocationHash+' '+elementId);
+            
             // Show first tab
- 	          showFirstTab(); 
+            if(plugin.settings.showFirstTab == true){
+            	//console.log('showFirstab '+elementId);
+ 	          	showFirstTab();
+ 	          } 
 	            
             // Bind click event
             $tabs.find('a').click(function(){
@@ -154,6 +161,14 @@
         		
         	}
         } // END switchPane()
+        
+        
+        
+        // PUBLIC METHODS
+        plugin.hideAll = function() {
+        	$tabs.find('li').removeClass('active');
+          $panes.children().hide();
+        }
         
         plugin.init();
     }

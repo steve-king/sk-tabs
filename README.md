@@ -34,6 +34,8 @@ The plugin converts AJAX tabs to standard show/hide ones once content is retriev
 
 		$('#my_container').skTabs();
 
+Note: You can call the plugin using a class instead, but your container must always have a unique ID for the plugin to reference.
+
 ##Default options
 		useLocationHash : false,                // Optional url hackable tabs 
 		showLoader : true,                      // Show loading div during ajax requests
