@@ -7,36 +7,36 @@
 
     $.skTabs = function(element, options) {
 				
-				// Plugin defaults
+		// Plugin defaults
         var defaults = {
         		animate : false,
-        		showFirstTab : false,
+        		showFirstTab : true,
         		useLocationHash : false,
             showLoader : true,
             loaderClass : 'skTabsLoader',
-            onAjaxComplete : function(){}
+            onAjaxComplete : function(){},
+            onSwitchPane : function(){}
         }
 				
-				// Public vars
+		// Public vars
         var plugin = this;
         plugin.settings = {};
         plugin.loader_appended = false;
         plugin.currentPane;
+        plugin.currentTab;
 				
-				// Private vars
+		// Private vars
         var $element = $(element),
             element = element,
-            elementId = $element.attr('id'),
-            $tabs = $element.find('.tabs').not('#'+elementId+' .panes .tabs'),
-            $panes = $element.children('.panes').not('#'+elementId+' .panes .panes');
+            //elementId = $element.attr('id'),
+            $tabs = $element.children('.tabs'),
+            $panes = $element.children('.panes');
         
         
         plugin.init = function() {
             
             plugin.settings = $.extend({}, defaults, options); // Extend defaults with any options passed
             
-            console.log(plugin.settings.showFirstTab+' '+elementId);
-            //console.log(plugin.settings.useLocationHash+' '+elementId);
             
             // Show first tab
             if(plugin.settings.showFirstTab == true){
@@ -45,49 +45,68 @@
  	          } 
 	            
             // Bind click event
-            $tabs.find('a').click(function(){
+            $tabs.find('a').click(function(e){
+				
+				if( !($(this).parent().hasClass('external_link')) ){
+					
+					e.preventDefault();
 							
-							if( !($(this).parent().hasClass('disabled')) ){
-	            			
-	            	var tabInfo = getTabInfo($(this));		
-	            	
-	            	// Update hash
-	            	if(plugin.settings.useLocationHash == true){
-	            		if(tabInfo.href.substring(0,1) == '#'){
-		            		window.location.hash = tabInfo.href;
-		            	} else {
-		            		window.location.hash = tabInfo.text;
+					if( !($(this).parent().hasClass('inactive')) && !($(this).parent().hasClass('nested'))){
+		            			
+		            	var tabInfo = getTabInfo($(this));		
+		            	
+		            	// Update hash
+		            	if(plugin.settings.useLocationHash == true){
+		            		if(tabInfo.href.substring(0,1) == '#'){
+			            		window.location.hash = tabInfo.href;
+			            	} else {
+			            		window.location.hash = tabInfo.text;
+			            	}
 		            	}
-	            	}
-	            	
-	            	// Change tab active class
-	            	$tabs.find('li').removeClass('active');
-	            	$(this).parent().addClass('active');
-	            	
-	            	// Switch content pane
-								switchPane(tabInfo.href, tabInfo.text);
-							}
-            	return false;
+		            	
+		            	// Change tab active class
+		            	$tabs.find('li').removeClass('active');
+		            	$(this).parent().addClass('active');
+		            	
+		            	if( $(this).parents('.nested').hasClass('active') ){
+		            		
+		            	} else {
+		            		$(this).parents('.nested').addClass('active');
+		            	}
+		            	
+		            	// Switch content pane
+						switchPane(tabInfo.href, tabInfo.text);
+					}
+	            	return false;
+				}			
+				
             });
         } // END plugin.init()
         
         var showFirstTab = function(){
         		
-        		$panes.children().hide();
+        	$panes.children().hide();
             var tabInfo;
             
-            // No hash found, or useLocationHash is turned off. Show the first pane	
+            // No hash found, or useLocationHash is turned off. 
             if(window.location.hash == '' || plugin.settings.useLocationHash == false){
-             				
-							$tabs.find('li:first-child').addClass('active');
-							tabInfo = getTabInfo($tabs.find('li:first-child a'));
-							switchPane(tabInfo.href, tabInfo.text);
+             	
+             	// Look for an active tab specified in html
+             	if($tabs.find('li.active').length > 0){
+             		tabInfo = getTabInfo($tabs.find('li.active a'));
+             	} else {
+             		// None are active. Show first by default.
+             		$tabs.find('li:first-child').addClass('active');
+					tabInfo = getTabInfo($tabs.find('li:first-child a'));
+             	}
+ 				switchPane(tabInfo.href, tabInfo.text);
 							
             } else {
             // Show pane which matches url hash
             	
             	if($tabs.find('li a[href="'+window.location.hash+'"]').length > 0){
             		
+            		$tabs.find('li').removeClass('active');
             		$tabs.find('li a[href="'+window.location.hash+'"]').parent().addClass('active');
             		tabInfo = getTabInfo($tabs.find('li a[href="'+window.location.hash+'"]'));
             		switchPane(window.location.hash, tabInfo.text);
@@ -105,7 +124,7 @@
 	        					$(this).parent().addClass('active');
 	        					switchPane(tabInfo.href, tabInfo.text);
 	        				}
-	        			});
+	        		});
             	}
             	
             }
@@ -116,6 +135,7 @@
         		
         		var tabInfo = {}, text;
         		
+        		// data-label (if present) overrides link text
         		if(clickedElement.attr('data-label')){
         			text = clickedElement.attr('data-label');
         		} else {
@@ -124,7 +144,10 @@
         		}
         		
         		tabInfo.text = text;
+        		
+        		
         		tabInfo.href = clickedElement.attr('href');
+        		
         		return tabInfo;
         }
         
@@ -174,6 +197,8 @@
             });
         		
         	}
+        	
+        	plugin.settings.onSwitchPane.call(this, plugin);
         } // END switchPane()
         
         var showPane = function(){
