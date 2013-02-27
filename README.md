@@ -25,8 +25,8 @@ The plugin converts AJAX tabs to standard show/hide ones once content is retriev
 			</ul>
 	
 			<div class="panes">
-				<div id="#pane1">Pane 1 content</div>
-				<div id="#pane2">Pane 2 content</div>
+				<div id="pane1">Pane 1 content</div>
+				<div id="pane2">Pane 2 content</div>
 			</div>
 		</div>
 
